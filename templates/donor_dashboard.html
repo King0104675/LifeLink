@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+
+{% block title %}Donor Dashboard - LifeLink{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Profile Card -->
+        <div class="col-lg-4 mb-4">
+            <div class="card fade-in">
+                <div class="card-header bg-success text-white text-center">
+                    <h5 class="mb-0"><i class="fas fa-user-circle me-2"></i>Donor Profile</h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <div class="bg-success rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                            <i class="fas fa-user fa-2x text-white"></i>
+                        </div>
+                    </div>
+                    <h5 class="text-center fw-bold">{{ donor.name }}</h5>
+                    <div class="row text-center mb-3">
+                        <div class="col-6">
+                            <div class="border-end">
+                                <div class="fw-bold text-danger">{{ donor.blood_group }}</div>
+                                <small class="text-muted">Blood Group</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="fw-bold text-success">{{ donor.organs|length }}</div>
+                            <small class="text-muted">Organs</small>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span>Availability:</span>
+                            <span class="badge bg-{{ 'success' if donor.available else 'secondary' }}">
+                                {{ 'Available' if donor.available else 'Unavailable' }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <hr>
+                    <div class="small">
+                        <div class="mb-2"><i class="fas fa-envelope me-2"></i>{{ donor.email }}</div>
+                        <div class="mb-2"><i class="fas fa-phone me-2"></i>{{ donor.phone }}</div>
+                        <div class="mb-2"><i class="fas fa-map-marker-alt me-2"></i>{{ donor.city }}</div>
+                        <div class="mb-2"><i class="fas fa-calendar me-2"></i>Age: {{ donor.age }}</div>
+                        {% if donor.organs %}
+                        <div class="mb-2">
+                            <i class="fas fa-heart me-2"></i>
+                            <small>Organs: {{ donor.organs|join(', ') }}</small>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notifications Panel -->
+        <div class="col-lg-8">
+            <div class="card fade-in">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-bell me-2"></i>Donation Requests</h5>
+                    <span class="badge bg-primary">{{ notifications|length }} Notifications</span>
+                </div>
+                <div class="card-body">
+                    {% if notifications %}
+                        {% for notification in notifications %}
+                        <div class="notification-card {{ 'border-success' if notification.status == 'accepted' else '' }}">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <h6 class="fw-bold text-danger mb-2">
+                                        {{ notification.message }}
+                                        {% if notification.status == 'accepted' %}
+                                            <span class="badge bg-success ms-2">Accepted</span>
+                                        {% endif %}
+                                    </h6>
+                                    <div class="row g-2 mb-3">
+                                        <div class="col-auto">
+                                            <span class="distance-badge">
+                                                <i class="fas fa-map-marker-alt me-1"></i>{{ notification.distance }} km away
+                                            </span>
+                                        </div>
+                                        <div class="col-auto">
+                                            <span class="badge bg-secondary">
+                                                <i class="fas fa-clock me-1"></i>{{ notification.timestamp[:19] }}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Request Details -->
+                                    {% set request = active_requests[notification.request_id] %}
+                                    {% if request %}
+                                    <div class="row g-2 text-small">
+                                        <div class="col-md-6">
+                                            <strong>Patient:</strong> {{ request.patient_name }}<br>
+                                            <strong>Contact:</strong> {{ request.contact_person }}<br>
+                                            <strong>Phone:</strong> {{ request.phone }}
+                                        </div>
+                                        <div class="col-md-6">
+                                            <strong>Hospital:</strong> {{ request.hospital }}<br>
+                                            <strong>City:</strong> {{ request.city }}<br>
+                                            <strong>Urgency:</strong> 
+                                            <span class="badge bg-{{ 'danger' if request.urgency == 'critical' else 'warning' if request.urgency == 'urgent' else 'info' }}">
+                                                {{ request.urgency|title }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            {% if notification.status == 'pending' %}
+                            <div class="text-end mt-3">
+                                <form method="POST" action="{{ url_for('accept_request') }}" class="d-inline">
+                                    <input type="hidden" name="request_id" value="{{ notification.request_id }}">
+                                    <input type="hidden" name="notification_id" value="{{ notification.id }}">
+                                    <button type="submit" class="btn btn-success btn-sm">
+                                        <i class="fas fa-check me-1"></i>Accept Request
+                                    </button>
+                                </form>
+                                <button class="btn btn-outline-secondary btn-sm ms-2" onclick="declineRequest('{{ notification.id }}')">
+                                    <i class="fas fa-times me-1"></i>Decline
+                                </button>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-bell-slash fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No Notifications Yet</h5>
+                            <p class="text-muted">When someone needs your blood type or organs, you'll be notified here.</p>
+                            <a href="{{ url_for('all_requests') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-search me-2"></i>View All Active Requests
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="row mt-4">
+                <div class="col-md-6 mb-3">
+                    <div class="card border-0 bg-light">
+                        <div class="card-body text-center">
+                            <i class="fas fa-edit fa-2x text-primary mb-3"></i>
+                            <h6 class="fw-bold">Update Profile</h6>
+                            <p class="small text-muted">Keep your information current</p>
+                            <button class="btn btn-outline-primary btn-sm">Update Details</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="card border-0 bg-light">
+                        <div class="card-body text-center">
+                            <i class="fas fa-history fa-2x text-success mb-3"></i>
+                            <h6 class="fw-bold">Donation History</h6>
+                            <p class="small text-muted">View your past donations</p>
+                            <button class="btn btn-outline-success btn-sm">View History</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function declineRequest(notificationId) {
+    if (confirm('Are you sure you want to decline this request?')) {
+        // Here you would implement the decline functionality
+        alert('Request declined. The system will look for other donors.');
+    }
+}
+
+// Auto-refresh notifications every 30 seconds
+setInterval(function() {
+    // In a real app, you'd use AJAX to refresh notifications
+    // location.reload();
+}, 30000);
+</script>
+{% endblock %}

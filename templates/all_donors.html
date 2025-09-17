@@ -1,0 +1,275 @@
+{% extends "base.html" %}
+
+{% block title %}Registered Donors - LifeLink{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold">
+                    <i class="fas fa-users me-2 text-success"></i>Registered Life Savers
+                </h2>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-primary" onclick="filterDonors('all')">
+                        <i class="fas fa-list me-1"></i>All
+                    </button>
+                    <button class="btn btn-outline-success" onclick="filterDonors('available')">
+                        <i class="fas fa-check-circle me-1"></i>Available
+                    </button>
+                    <select class="form-select" onchange="filterByBloodGroup(this.value)" style="width: auto;">
+                        <option value="">All Blood Groups</option>
+                        <option value="A+">A+</option>
+                        <option value="A-">A-</option>
+                        <option value="B+">B+</option>
+                        <option value="B-">B-</option>
+                        <option value="AB+">AB+</option>
+                        <option value="AB-">AB-</option>
+                        <option value="O+">O+</option>
+                        <option value="O-">O-</option>
+                    </select>
+                </div>
+            </div>
+
+            {% if donors %}
+                <div class="row g-4">
+                    {% for donor_id, donor in donors.items() %}
+                        <div class="col-lg-6 col-xl-4 donor-card" 
+                             data-available="{{ 'true' if donor.available else 'false' }}" 
+                             data-blood-group="{{ donor.blood_group }}">
+                            <div class="card h-100 fade-in">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-success rounded-circle d-inline-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px;">
+                                            <i class="fas fa-user text-white"></i>
+                                        </div>
+                                        <h6 class="mb-0 fw-bold">{{ donor.name }}</h6>
+                                    </div>
+                                    <span class="badge bg-{{ 'success' if donor.available else 'secondary' }}">
+                                        {{ 'Available' if donor.available else 'Busy' }}
+                                    </span>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <div class="row text-center">
+                                            <div class="col-4">
+                                                <div class="border-end">
+                                                    <div class="fw-bold text-danger">{{ donor.blood_group }}</div>
+                                                    <small class="text-muted">Blood</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="border-end">
+                                                    <div class="fw-bold text-primary">{{ donor.age }}</div>
+                                                    <small class="text-muted">Age</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="fw-bold text-success">{{ donor.organs|length }}</div>
+                                                <small class="text-muted">Organs</small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <h6 class="text-primary mb-2">Contact Information</h6>
+                                        <div class="small">
+                                            <div class="mb-1">
+                                                <i class="fas fa-envelope me-2 text-muted"></i>
+                                                <a href="mailto:{{ donor.email }}" class="text-decoration-none">{{ donor.email }}</a>
+                                            </div>
+                                            <div class="mb-1">
+                                                <i class="fas fa-phone me-2 text-muted"></i>
+                                                <a href="tel:{{ donor.phone }}" class="text-decoration-none">{{ donor.phone }}</a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <h6 class="text-primary mb-2">Location & Details</h6>
+                                        <div class="small">
+                                            <div class="mb-1">
+                                                <i class="fas fa-map-marker-alt me-2 text-muted"></i>{{ donor.city }}
+                                            </div>
+                                            <div class="mb-1">
+                                                <i class="fas fa-venus-mars me-2 text-muted"></i>{{ donor.gender|title }}
+                                            </div>
+                                            {% if donor.last_donation %}
+                                            <div class="mb-1">
+                                                <i class="fas fa-calendar me-2 text-muted"></i>Last donated: {{ donor.last_donation }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    {% if donor.organs %}
+                                    <div class="mb-3">
+                                        <h6 class="text-primary mb-2">Available Organs</h6>
+                                        <div class="d-flex flex-wrap gap-1">
+                                            {% for organ in donor.organs %}
+                                                <span class="badge bg-light text-dark border">{{ organ }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    {% endif %}
+
+                                    <div class="mb-3">
+                                        <small class="text-muted">
+                                            <i class="fas fa-clock me-1"></i>Registered: {{ donor.registered_date[:10] }}
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-light">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        {% if donor.available %}
+                                            <button class="btn btn-success btn-sm" onclick="contactDonor('{{ donor.name }}', '{{ donor.phone }}')">
+                                                <i class="fas fa-phone me-1"></i>Contact
+                                            </button>
+                                            <a href="mailto:{{ donor.email }}" class="btn btn-outline-primary btn-sm">
+                                                <i class="fas fa-envelope me-1"></i>Email
+                                            </a>
+                                        {% else %}
+                                            <button class="btn btn-secondary btn-sm" disabled>
+                                                <i class="fas fa-clock me-1"></i>Not Available
+                                            </button>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Load More Button -->
+                <div class="text-center mt-5" id="loadMore" style="display: none;">
+                    <button class="btn btn-outline-primary btn-lg">
+                        <i class="fas fa-plus me-2"></i>Load More Donors
+                    </button>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <div class="card">
+                        <div class="card-body py-5">
+                            <i class="fas fa-users fa-4x text-muted mb-4"></i>
+                            <h4 class="text-muted mb-3">No Donors Registered Yet</h4>
+                            <p class="text-muted mb-4">Be the first hero to register as a life-saving donor!</p>
+                            <a href="{{ url_for('register') }}" class="btn btn-success btn-lg">
+                                <i class="fas fa-heart me-2"></i>Register as Donor
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Bar -->
+<div class="bg-success text-white py-4 mt-5">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-3 col-6 mb-2">
+                <div class="fw-bold fs-4">{{ donors|length }}</div>
+                <div class="small">Total Donors</div>
+            </div>
+            <div class="col-md-3 col-6 mb-2">
+                <div class="fw-bold fs-4">{{ donors.values()|selectattr("available", "equalto", true)|list|length }}</div>
+                <div class="small">Available Now</div>
+            </div>
+            <div class="col-md-3 col-6 mb-2">
+                <div class="fw-bold fs-4">{{ donors.values()|map(attribute='organs')|sum(start=[])|length }}</div>
+                <div class="small">Organ Pledges</div>
+            </div>
+            <div class="col-md-3 col-6 mb-2">
+                <div class="fw-bold fs-4">{{ donors.values()|map(attribute='city')|unique|list|length }}</div>
+                <div class="small">Cities Covered</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Thank You Message -->
+<div class="py-5" style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);">
+    <div class="container text-center">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <h3 class="fw-bold text-success mb-3">Thank You, Life Savers! 🙏</h3>
+                <p class="lead text-success mb-4">Every donor registered here is a potential life saver. Your generosity and compassion make our communities stronger and healthier.</p>
+                <div class="d-flex flex-wrap justify-content-center gap-3">
+                    <a href="{{ url_for('register') }}" class="btn btn-success">
+                        <i class="fas fa-user-plus me-2"></i>Join Our Heroes
+                    </a>
+                    <a href="{{ url_for('request_donation') }}" class="btn btn-outline-success">
+                        <i class="fas fa-hand-holding-heart me-2"></i>Request Help
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function filterDonors(filter) {
+    const cards = document.querySelectorAll('.donor-card');
+
+    cards.forEach(card => {
+        const available = card.getAttribute('data-available') === 'true';
+
+        let show = false;
+
+        switch(filter) {
+            case 'all':
+                show = true;
+                break;
+            case 'available':
+                show = available;
+                break;
+        }
+
+        if (show) {
+            card.style.display = 'block';
+            card.classList.add('fade-in');
+        } else {
+            card.style.display = 'none';
+        }
+    });
+
+    // Update active button
+    document.querySelectorAll('.btn-outline-primary, .btn-outline-success').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    event.target.classList.add('active');
+}
+
+function filterByBloodGroup(bloodGroup) {
+    const cards = document.querySelectorAll('.donor-card');
+
+    cards.forEach(card => {
+        const donorBloodGroup = card.getAttribute('data-blood-group');
+
+        if (!bloodGroup || donorBloodGroup === bloodGroup) {
+            card.style.display = 'block';
+            card.classList.add('fade-in');
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
+function contactDonor(name, phone) {
+    if (confirm(`Contact ${name} at ${phone}?`)) {
+        window.location.href = `tel:${phone}`;
+    }
+}
+
+// Auto-refresh every 5 minutes
+setInterval(() => {
+    location.reload();
+}, 300000);
+
+// Initialize with all donors
+filterDonors('all');
+</script>
+{% endblock %}

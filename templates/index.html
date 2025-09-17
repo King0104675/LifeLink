@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="hero-section fade-in">
+    <div class="container">
+        <div class="hero-content text-center">
+            <h1 class="display-4 fw-bold mb-4">Save Lives Through Donation</h1>
+            <p class="lead mb-5">Connect blood and organ donors with recipients in need. Every donation counts, every life matters.</p>
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="d-flex flex-wrap justify-content-center gap-3">
+                        <a href="{{ url_for('register') }}" class="btn btn-light btn-lg px-5 py-3">
+                            <i class="fas fa-user-plus me-2"></i>Become a Donor
+                        </a>
+                        <a href="{{ url_for('request_donation') }}" class="btn btn-outline-light btn-lg px-5 py-3">
+                            <i class="fas fa-plus-circle me-2"></i>Request Donation
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Section -->
+<div class="container py-5">
+    <div class="row g-4">
+        <div class="col-lg-3 col-md-6">
+            <div class="stat-card fade-in">
+                <div class="stat-number">{{ stats.total_donors }}</div>
+                <div class="stat-label">Registered Donors</div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="stat-card fade-in">
+                <div class="stat-number">{{ stats.total_requests }}</div>
+                <div class="stat-label">Active Requests</div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="stat-card fade-in">
+                <div class="stat-number">{{ stats.successful_matches }}</div>
+                <div class="stat-label">Lives Connected</div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="stat-card fade-in">
+                <div class="stat-number">{{ stats.blood_banks }}</div>
+                <div class="stat-label">Partner Blood Banks</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h2 class="fw-bold mb-3">How LifeLink Works</h2>
+        <p class="lead text-muted">Simple, fast, and reliable donation matching system</p>
+    </div>
+    <div class="row g-4">
+        <div class="col-lg-4 col-md-6">
+            <div class="card h-100 border-0">
+                <div class="card-body text-center p-4">
+                    <div class="mb-4">
+                        <i class="fas fa-user-plus fa-3x text-primary"></i>
+                    </div>
+                    <h5 class="card-title fw-bold">Register as Donor</h5>
+                    <p class="card-text">Sign up with your details, location, and donation preferences. Quick and secure registration process.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-6">
+            <div class="card h-100 border-0">
+                <div class="card-body text-center p-4">
+                    <div class="mb-4">
+                        <i class="fas fa-bell fa-3x text-primary"></i>
+                    </div>
+                    <h5 class="card-title fw-bold">Get Notifications</h5>
+                    <p class="card-text">Receive alerts when someone nearby needs your blood type or organ donation. Choose your availability.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-6">
+            <div class="card h-100 border-0">
+                <div class="card-body text-center p-4">
+                    <div class="mb-4">
+                        <i class="fas fa-heart fa-3x text-primary"></i>
+                    </div>
+                    <h5 class="card-title fw-bold">Save Lives</h5>
+                    <p class="card-text">Connect directly with recipients, coordinate donation, and make a life-saving difference in your community.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Call to Action -->
+<div class="py-5" style="background: linear-gradient(135deg, #fef7f7 0%, #fdeaea 100%);">
+    <div class="container text-center">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <h2 class="fw-bold mb-4">Ready to Save Lives?</h2>
+                <p class="lead mb-4">Join thousands of donors who are making a difference. Your donation can save up to 3 lives.</p>
+                <div class="d-flex flex-wrap justify-content-center gap-3">
+                    <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg px-5">
+                        <i class="fas fa-heart me-2"></i>Start Donating Today
+                    </a>
+                    <a href="{{ url_for('all_requests') }}" class="btn btn-outline-primary btn-lg px-5">
+                        <i class="fas fa-search me-2"></i>View Urgent Requests
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+
+{% block title %}Request Status - LifeLink{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card fade-in">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Request Status: 
+                        <span class="badge bg-{{ 'success' if request.status == 'matched' else 'warning' if request.status == 'active' else 'secondary' }} ms-2">
+                            {{ request.status|title }}
+                        </span>
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <!-- Request Details -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3">Patient Information</h6>
+                            <div class="mb-2"><strong>Patient Name:</strong> {{ request.patient_name }}</div>
+                            <div class="mb-2"><strong>Contact Person:</strong> {{ request.contact_person }}</div>
+                            <div class="mb-2"><strong>Phone:</strong> {{ request.phone }}</div>
+                            <div class="mb-2"><strong>Email:</strong> {{ request.email }}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3">Request Details</h6>
+                            <div class="mb-2"><strong>Type:</strong> {{ request.type|title }} Donation</div>
+                            {% if request.type == 'blood' %}
+                                <div class="mb-2"><strong>Blood Group:</strong> <span class="badge bg-danger">{{ request.blood_group }}</span></div>
+                                <div class="mb-2"><strong>Quantity:</strong> {{ request.quantity }} Unit(s)</div>
+                            {% else %}
+                                <div class="mb-2"><strong>Organ:</strong> {{ request.organ }}</div>
+                            {% endif %}
+                            <div class="mb-2"><strong>Urgency:</strong> 
+                                <span class="badge bg-{{ 'danger' if request.urgency == 'critical' else 'warning' if request.urgency == 'urgent' else 'info' }}">
+                                    {{ request.urgency|title }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Location Information -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3">Location Details</h6>
+                            <div class="mb-2"><strong>City:</strong> {{ request.city }}</div>
+                            <div class="mb-2"><strong>Hospital:</strong> {{ request.hospital }}</div>
+                            <div class="mb-2"><strong>Search Radius:</strong> {{ request.max_distance }} km</div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3">Timeline</h6>
+                            <div class="mb-2"><strong>Request Created:</strong> {{ request.created_date[:19] }}</div>
+                            <div class="mb-2"><strong>Request ID:</strong> <code>{{ request.id[:8] }}...</code></div>
+                        </div>
+                    </div>
+
+                    {% if request.additional_info %}
+                    <div class="mb-4">
+                        <h6 class="text-primary mb-3">Additional Information</h6>
+                        <div class="bg-light p-3 rounded">
+                            {{ request.additional_info }}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Status Updates -->
+                    <div class="mb-4">
+                        <h6 class="text-primary mb-3">Status Updates</h6>
+                        <div class="timeline">
+                            <div class="timeline-item active">
+                                <div class="timeline-marker bg-success"></div>
+                                <div class="timeline-content">
+                                    <strong>Request Submitted</strong>
+                                    <div class="small text-muted">{{ request.created_date[:19] }}</div>
+                                </div>
+                            </div>
+                            <div class="timeline-item {{ 'active' if request.status in ['matched', 'completed'] else '' }}">
+                                <div class="timeline-marker {{ 'bg-success' if request.status in ['matched', 'completed'] else 'bg-secondary' }}"></div>
+                                <div class="timeline-content">
+                                    <strong>Donor Found</strong>
+                                    {% if matched_donor %}
+                                        <div class="small text-success">Matched with donor</div>
+                                    {% else %}
+                                        <div class="small text-muted">Searching for compatible donors...</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-secondary"></div>
+                                <div class="timeline-content">
+                                    <strong>Donation Completed</strong>
+                                    <div class="small text-muted">Pending</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Matched Donor Information -->
+                    {% if matched_donor %}
+                    <div class="alert alert-success">
+                        <h5 class="alert-heading">
+                            <i class="fas fa-check-circle me-2"></i>Donor Found!
+                        </h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-2"><strong>Donor Name:</strong> {{ matched_donor.name }}</div>
+                                <div class="mb-2"><strong>Blood Group:</strong> {{ matched_donor.blood_group }}</div>
+                                <div class="mb-2"><strong>Location:</strong> {{ matched_donor.city }}</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-2"><strong>Contact:</strong> {{ matched_donor.phone }}</div>
+                                <div class="mb-2"><strong>Email:</strong> {{ matched_donor.email }}</div>
+                            </div>
+                        </div>
+                        <hr class="my-3">
+                        <p class="mb-0">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Please contact the donor directly to coordinate the donation. Thank you for using LifeLink!
+                        </p>
+                    </div>
+                    {% endif %}
+
+                    <!-- Action Buttons -->
+                    <div class="text-center">
+                        {% if request.status == 'active' %}
+                            <div class="mb-3">
+                                <div class="spinner-border text-primary me-2" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <span class="text-muted">Searching for compatible donors...</span>
+                            </div>
+                        {% endif %}
+
+                        <div class="d-flex flex-wrap justify-content-center gap-3">
+                            <a href="{{ url_for('home') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-home me-2"></i>Back to Home
+                            </a>
+                            <button class="btn btn-outline-secondary" onclick="window.print()">
+                                <i class="fas fa-print me-2"></i>Print Request
+                            </button>
+                            {% if request.status == 'active' %}
+                                <button class="btn btn-primary" onclick="refreshStatus()">
+                                    <i class="fas fa-sync me-2"></i>Refresh Status
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Emergency Information -->
+            <div class="card mt-4 border-warning">
+                <div class="card-header bg-warning text-dark">
+                    <h6 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Emergency Information</h6>
+                </div>
+                <div class="card-body">
+                    <p class="mb-2">For immediate medical emergencies, please contact:</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-2"><strong>Emergency Services:</strong> <a href="tel:108" class="btn btn-outline-danger btn-sm">108</a></div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-2"><strong>Blood Bank Emergency:</strong> <a href="tel:1910" class="btn btn-outline-danger btn-sm">1910</a></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #dee2e6;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -23px;
+    top: 5px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid white;
+}
+
+.timeline-content {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.timeline-item.active .timeline-content {
+    background: #f8f9fa;
+    border-left: 4px solid var(--success-color);
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function refreshStatus() {
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<span class="loading-spinner me-2"></span>Refreshing...';
+    btn.disabled = true;
+
+    // Simulate refresh delay
+    setTimeout(() => {
+        location.reload();
+    }, 2000);
+}
+
+// Auto-refresh every 60 seconds for active requests
+{% if request.status == 'active' %}
+setInterval(() => {
+    location.reload();
+}, 60000);
+{% endif %}
+</script>
+{% endblock %}

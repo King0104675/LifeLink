@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+
+{% block title %}Request Donation - LifeLink{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card fade-in">
+                <div class="card-header bg-danger text-white text-center py-4">
+                    <h3 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Request Life-Saving Donation</h3>
+                    <p class="mb-0 mt-2 opacity-75">Connect with nearby donors who can help save a life</p>
+                </div>
+                <div class="card-body p-5">
+                    <form method="POST" action="{{ url_for('submit_request') }}" id="requestForm">
+                        <!-- Patient Information -->
+                        <div class="mb-4">
+                            <h5 class="text-danger mb-3"><i class="fas fa-user-injured me-2"></i>Patient Information</h5>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="patient_name" class="form-label">Patient Name *</label>
+                                    <input type="text" class="form-control" id="patient_name" name="patient_name" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="contact_person" class="form-label">Contact Person *</label>
+                                    <input type="text" class="form-control" id="contact_person" name="contact_person" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="phone" class="form-label">Phone Number *</label>
+                                    <input type="tel" class="form-control" id="phone" name="phone" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="email" class="form-label">Email Address *</label>
+                                    <input type="email" class="form-control" id="email" name="email" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Location Information -->
+                        <div class="mb-4">
+                            <h5 class="text-danger mb-3"><i class="fas fa-map-marker-alt me-2"></i>Location Information</h5>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="city" class="form-label">City *</label>
+                                    <select class="form-control" id="city" name="city" required>
+                                        <option value="">Select City</option>
+                                        {% for city in cities %}
+                                            <option value="{{ city }}">{{ city }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="hospital" class="form-label">Hospital/Medical Center *</label>
+                                    <input type="text" class="form-control" id="hospital" name="hospital" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="max_distance" class="form-label">Search Radius (km) *</label>
+                                    <select class="form-control" id="max_distance" name="max_distance" required>
+                                        <option value="10">Within 10 km</option>
+                                        <option value="25" selected>Within 25 km</option>
+                                        <option value="50">Within 50 km</option>
+                                        <option value="100">Within 100 km</option>
+                                        <option value="200">Within 200 km</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="urgency" class="form-label">Urgency Level *</label>
+                                    <select class="form-control" id="urgency" name="urgency" required>
+                                        <option value="">Select Urgency</option>
+                                        <option value="critical" class="text-danger">Critical (Within 24 hours)</option>
+                                        <option value="urgent" class="text-warning">Urgent (Within 3 days)</option>
+                                        <option value="moderate" class="text-info">Moderate (Within 1 week)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Donation Requirements -->
+                        <div class="mb-4">
+                            <h5 class="text-danger mb-3"><i class="fas fa-heartbeat me-2"></i>Donation Requirements</h5>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="type" class="form-label">Donation Type *</label>
+                                    <select class="form-control" id="type" name="type" required onchange="toggleDonationType()">
+                                        <option value="">Select Type</option>
+                                        <option value="blood">Blood Donation</option>
+                                        <option value="organ">Organ Donation</option>
+                                    </select>
+                                </div>
+
+                                <!-- Blood-specific fields -->
+                                <div class="col-md-6" id="bloodGroup" style="display: none;">
+                                    <label for="blood_group" class="form-label">Required Blood Group *</label>
+                                    <select class="form-control" id="blood_group" name="blood_group">
+                                        <option value="">Select Blood Group</option>
+                                        <option value="A+">A+</option>
+                                        <option value="A-">A-</option>
+                                        <option value="B+">B+</option>
+                                        <option value="B-">B-</option>
+                                        <option value="AB+">AB+</option>
+                                        <option value="AB-">AB-</option>
+                                        <option value="O+">O+</option>
+                                        <option value="O-">O-</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6" id="bloodQuantity" style="display: none;">
+                                    <label for="quantity" class="form-label">Quantity (Units) *</label>
+                                    <select class="form-control" id="quantity" name="quantity">
+                                        <option value="1">1 Unit</option>
+                                        <option value="2">2 Units</option>
+                                        <option value="3">3 Units</option>
+                                        <option value="4">4 Units</option>
+                                        <option value="5">5+ Units</option>
+                                    </select>
+                                </div>
+
+                                <!-- Organ-specific fields -->
+                                <div class="col-md-6" id="organType" style="display: none;">
+                                    <label for="organ" class="form-label">Required Organ *</label>
+                                    <select class="form-control" id="organ" name="organ">
+                                        <option value="">Select Organ</option>
+                                        {% for organ in organs %}
+                                            <option value="{{ organ }}">{{ organ }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Additional Information -->
+                        <div class="mb-4">
+                            <h5 class="text-danger mb-3"><i class="fas fa-info-circle me-2"></i>Additional Information</h5>
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label for="additional_info" class="form-label">Medical Details & Special Requirements</label>
+                                    <textarea class="form-control" id="additional_info" name="additional_info" rows="4" placeholder="Please provide any additional medical information, special requirements, or urgency details that donors should know..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Emergency Contact -->
+                        <div class="alert alert-warning">
+                            <h6><i class="fas fa-exclamation-triangle me-2"></i>Emergency Contact Information</h6>
+                            <p class="mb-0">In case of critical situations, ensure emergency contacts are available 24/7. For immediate assistance, call <strong>108 (Emergency)</strong> or <strong>1910 (Blood Bank)</strong>.</p>
+                        </div>
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-danger btn-lg px-5">
+                                <i class="fas fa-paper-plane me-2"></i>Submit Request & Notify Donors
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Information Cards -->
+            <div class="row mt-5">
+                <div class="col-md-6 mb-3">
+                    <div class="card border-0 bg-light h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-clock fa-2x text-primary mb-3"></i>
+                            <h6 class="fw-bold">Quick Response</h6>
+                            <p class="small text-muted">Compatible donors typically respond within 2-4 hours of notification</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="card border-0 bg-light h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-users fa-2x text-success mb-3"></i>
+                            <h6 class="fw-bold">Wide Network</h6>
+                            <p class="small text-muted">Access to thousands of verified donors across major Indian cities</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleDonationType() {
+    const type = document.getElementById('type').value;
+    const bloodGroup = document.getElementById('bloodGroup');
+    const bloodQuantity = document.getElementById('bloodQuantity');
+    const organType = document.getElementById('organType');
+
+    if (type === 'blood') {
+        bloodGroup.style.display = 'block';
+        bloodQuantity.style.display = 'block';
+        organType.style.display = 'none';
+        document.getElementById('blood_group').required = true;
+        document.getElementById('organ').required = false;
+    } else if (type === 'organ') {
+        bloodGroup.style.display = 'none';
+        bloodQuantity.style.display = 'none';
+        organType.style.display = 'block';
+        document.getElementById('blood_group').required = false;
+        document.getElementById('organ').required = true;
+    } else {
+        bloodGroup.style.display = 'none';
+        bloodQuantity.style.display = 'none';
+        organType.style.display = 'none';
+        document.getElementById('blood_group').required = false;
+        document.getElementById('organ').required = false;
+    }
+}
+
+document.getElementById('requestForm').addEventListener('submit', function(e) {
+    const submitBtn = document.querySelector('button[type="submit"]');
+    submitBtn.innerHTML = '<span class="loading-spinner me-2"></span>Submitting Request...';
+    submitBtn.disabled = true;
+});
+</script>
+{% endblock %}
